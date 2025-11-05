@@ -573,13 +573,15 @@
     <script>
         // Volume options with natural language descriptions
         const VOLUME_OPTIONS = [
-            { value: 330, label: '330ml (Single)' },
-            { value: 440, label: '440ml (Single)' },
-            { value: 500, label: '500ml (Single)' },
-            { value: 568, label: '568ml (Pint)' },
-            { value: 620, label: '620ml (Single)' },
-            { value: 660, label: '660ml (Single)' },
-            { value: 700, label: '700ml (Single)' },
+            { value: 330, label: '330ml' },
+            { value: 440, label: '440ml' },
+            { value: 500, label: '500ml' },
+            { value: 568, label: '568ml' },
+            { value: 620, label: '620ml' },
+            { value: 660, label: '660ml' },
+            { value: 700, label: '700ml' },
+            { value: 750, label: '750ml' },
+            { value: 1250, label: '1.25L' },
             { value: 1320, label: '330ml 4-pack' },
             { value: 1760, label: '440ml 4-pack' },
             { value: 2000, label: '500ml 4-pack' },
@@ -704,6 +706,11 @@
             updateComparison();
         }
 
+        function calculateUnits(volume, abv) {
+            // Units = (volume in ml × ABV%) / 1000
+            return (volume * abv) / 1000;
+        }
+
         function renderGroups() {
             if (groups.length === 0) {
                 groupsContainer.innerHTML = `
@@ -752,6 +759,15 @@
         }
 
         function renderDrinkItem(groupId, drink) {
+            // Calculate units if we have the necessary data
+            let unitsDisplay = '';
+            if (drink.selectedDrink && drink.volume) {
+                const volume = parseFloat(drink.volume);
+                const abv = parseFloat(drink.selectedDrink["ABV(%)"].replace('%', ''));
+                const units = calculateUnits(volume, abv);
+                unitsDisplay = `<div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 0.375rem; font-size: 0.875rem; color: var(--primary-accent); font-weight: 600;">📊 ${units.toFixed(1)} units</div>`;
+            }
+
             return `
                 <div class="drink-item">
                     <div class="drink-item-header">
@@ -801,6 +817,8 @@
                             oninput="updateDrinkData(${groupId}, ${drink.id})"
                         >
                     </div>
+                    
+                    ${unitsDisplay}
                 </div>
             `;
         }
@@ -863,9 +881,13 @@
             drinks.forEach(drink => {
                 const item = document.createElement('div');
                 item.className = 'dropdown-item';
+                
+                // Show price in dropdown if available
+                const priceDisplay = drink["Price(£)"] ? ` • £${parseFloat(drink["Price(£)"]).toFixed(2)}` : '';
+                
                 item.innerHTML = `
                     <span>${drink.name}</span>
-                    <span class="drink-abv">${drink["ABV(%)"]}</span>
+                    <span class="drink-abv">${drink["ABV(%)"]}${priceDisplay}</span>
                 `;
                 
                 item.addEventListener('mousedown', (e) => {
@@ -891,9 +913,20 @@
                 searchInput.value = drink.name;
             }
             
+            // Pre-load price if available in the data
+            if (drink["Price(£)"]) {
+                drinkItem.price = drink["Price(£)"];
+                const priceInput = document.getElementById(`price-${groupId}-${drinkId}`);
+                if (priceInput) {
+                    priceInput.value = drink["Price(£)"];
+                }
+            }
+            
             const dropdown = document.getElementById(`dropdown-${groupId}-${drinkId}`);
             hideDropdown(dropdown);
             
+            // Re-render to show units
+            renderGroups();
             updateComparison();
         }
 
@@ -910,6 +943,8 @@
             if (volumeSelect) drinkItem.volume = volumeSelect.value;
             if (priceInput) drinkItem.price = priceInput.value;
             
+            // Re-render to update units display
+            renderGroups();
             updateComparison();
         }
 
@@ -939,7 +974,12 @@
                 const validDrinks = group.drinks
                     .map(drink => ({
                         ...drink,
-                        value: calculateDrinkValue(drink)
+                        value: calculateDrinkValue(drink),
+                        units: drink.selectedDrink && drink.volume ? 
+                            calculateUnits(
+                                parseFloat(drink.volume), 
+                                parseFloat(drink.selectedDrink["ABV(%)"].replace('%', ''))
+                            ) : 0
                     }))
                     .filter(drink => drink.value !== null);
 
@@ -948,17 +988,20 @@
                         groupId: group.id,
                         averageValue: null,
                         drinkCount: 0,
+                        totalUnits: 0,
                         validDrinks: []
                     };
                 }
 
                 const totalValue = validDrinks.reduce((sum, drink) => sum + drink.value, 0);
+                const totalUnits = validDrinks.reduce((sum, drink) => sum + drink.units, 0);
                 const averageValue = totalValue / validDrinks.length;
 
                 return {
                     groupId: group.id,
                     averageValue: averageValue,
                     drinkCount: validDrinks.length,
+                    totalUnits: totalUnits,
                     validDrinks: validDrinks
                 };
             });
@@ -978,7 +1021,10 @@
                     resultElement.innerHTML = `
                         <div class="result-label">Average Value Score</div>
                         <div class="result-value">${result.averageValue.toFixed(2)}</div>
-                        <div class="result-details">${result.drinkCount} drink${result.drinkCount !== 1 ? 's' : ''} compared</div>
+                        <div class="result-details">
+                            ${result.drinkCount} drink${result.drinkCount !== 1 ? 's' : ''} compared • 
+                            ${result.totalUnits.toFixed(1)} units total
+                        </div>
                     `;
                 }
             });
@@ -1011,6 +1057,9 @@
                                 <span style="opacity: 0.8;">
                                     ${result.drinkCount} drink${result.drinkCount !== 1 ? 's' : ''}
                                 </span>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.875rem; opacity: 0.9;">
+                                📊 ${result.totalUnits.toFixed(1)} units total
                             </div>
                             ${isBest ? '<span class="best-value-indicator">🏆 BEST VALUE</span>' : ''}
                         </div>
