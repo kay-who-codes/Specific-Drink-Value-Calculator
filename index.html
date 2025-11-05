@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍾 Specific Drink Value Calculator</title>
+    <style>
+        :root {
+            --bg-dark: #131313;
+            --text-light: #E0E0E0;
+            --text-white: #FFFFFF;
+            --primary-accent: #ff4015;
+            --secondary-accent: #b51a00;
+            --card-bg: #1e1e1e;
+            --input-bg: #2a2a2a;
+            --border-color: #333;
+            --hover-bg: #333;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .app-title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .app-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        .calculator-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+            transition: var(--transition);
+        }
+
+        .calculator-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .loading-state {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary-accent);
+            font-size: 1.1rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary-accent);
+            background: rgba(255, 64, 21, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 64, 21, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--text-white);
+            font-size: 1rem;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-white);
+            font-size: 1rem;
+            transition: var(--transition);
+            min-height: 48px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(255, 64, 21, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .search-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--input-bg);
+            border: 2px solid var(--primary-accent);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-10px);
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .dropdown.show {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .dropdown-item {
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 48px;
+        }
+
+        .dropdown-item:hover {
+            background: var(--hover-bg);
+            color: var(--primary-accent);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .drink-abv {
+            font-size: 0.9rem;
+            color: var(--primary-accent);
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-white);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 48px;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E0E0E0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+            padding-right: 3rem;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(255, 64, 21, 0.1);
+            transform: translateY(-1px);
+        }
+
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        select option {
+            background: var(--input-bg);
+            color: var(--text-white);
+            padding: 0.5rem;
+        }
+
+        .price-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-white);
+            font-size: 1rem;
+            transition: var(--transition);
+            min-height: 48px;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(255, 64, 21, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .price-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-section {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(255, 64, 21, 0.1), rgba(181, 26, 0, 0.1));
+            border-radius: 12px;
+            border: 1px solid rgba(255, 64, 21, 0.2);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .result-section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-label {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-unit {
+            font-size: 1rem;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+
+        .error-message {
+            color: var(--primary-accent);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: var(--transition);
+        }
+
+        .error-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            main {
+                padding: 1rem 0;
+            }
+
+            .calculator-card {
+                padding: 1.5rem;
+                margin: 0.5rem 0;
+            }
+
+            .app-header {
+                margin-bottom: 2rem;
+            }
+
+            .input-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .result-section {
+                padding: 1.5rem;
+            }
+
+            .result-value {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calculator-card {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .search-input,
+            select,
+            .price-input {
+                padding: 0.875rem 1rem;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .dropdown-item {
+                padding: 0.875rem 1rem;
+            }
+        }
+
+        /* Custom scrollbar for dropdown */
+        .dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown::-webkit-scrollbar-track {
+            background: var(--input-bg);
+        }
+
+        .dropdown::-webkit-scrollbar-thumb {
+            background: var(--primary-accent);
+            border-radius: 3px;
+        }
+
+        .dropdown::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-accent);
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header class="app-header">
+            <h1 class="app-title">Specific Drink Value Calculator</h1>
+            <p class="app-subtitle">Find the best value drinks based on volume, price, and ABV</p>
+        </header>
+
+        <section class="calculator-card" id="calculator-card">
+            <div id="loading-message" class="loading-message" style="display: none;">
+                Loading drinks data...
+            </div>
+
+            <div id="error-message" class="error-state" style="display: none;">
+                <h3>Unable to Load Drinks Data</h3>
+                <p>Please make sure the drinks.json file is in the same folder as this HTML file.</p>
+                <p>Expected format:</p>
+                <pre style="text-align: left; margin-top: 1rem; font-size: 0.9rem;">
+{
+  "Drinks": [
+    {
+      "name": "Drink Name",
+      "ABV(%)": "5%"
+    }
+  ]
+}
+                </pre>
+            </div>
+
+            <div id="app-content">
+                <div class="input-group">
+                    <label for="drink-search" class="input-label">Select Drink</label>
+                    <div class="search-container">
+                        <input 
+                            type="text" 
+                            id="drink-search" 
+                            class="search-input" 
+                            placeholder="Search for a drink..."
+                            autocomplete="off"
+                            disabled
+                        >
+                        <div id="dropdown" class="dropdown"></div>
+                    </div>
+                    <div id="drink-error" class="error-message">Please select a drink</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="volume-select" class="input-label">Volume</label>
+                    <select id="volume-select" disabled>
+                        <option value="">Select volume...</option>
+                        <option value="440">440ml</option>
+                        <option value="500">500ml</option>
+                        <option value="568">568ml</option>
+                        <option value="620">620ml</option>
+                        <option value="660">660ml</option>
+                        <option value="700">700ml</option>
+                    </select>
+                    <div id="volume-error" class="error-message">Please select a volume</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="price-input" class="input-label">Price (£)</label>
+                    <input 
+                        type="number" 
+                        id="price-input" 
+                        class="price-input" 
+                        placeholder="Enter price..."
+                        step="0.01"
+                        min="0"
+                        disabled
+                    >
+                    <div id="price-error" class="error-message">Please enter a valid price</div>
+                </div>
+
+                <div id="result-section" class="result-section">
+                    <div class="result-label">Drink Value</div>
+                    <div id="result-value" class="result-value">0.00</div>
+                    <div class="result-unit">Value Score</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // DOM elements
+        const searchInput = document.getElementById('drink-search');
+        const dropdown = document.getElementById('dropdown');
+        const volumeSelect = document.getElementById('volume-select');
+        const priceInput = document.getElementById('price-input');
+        const resultSection = document.getElementById('result-section');
+        const resultValue = document.getElementById('result-value');
+        const drinkError = document.getElementById('drink-error');
+        const volumeError = document.getElementById('volume-error');
+        const priceError = document.getElementById('price-error');
+        const loadingMessage = document.getElementById('loading-message');
+        const errorMessage = document.getElementById('error-message');
+        const appContent = document.getElementById('app-content');
+        const calculatorCard = document.getElementById('calculator-card');
+
+        // State
+        let drinksData = null;
+        let selectedDrink = null;
+        let filteredDrinks = [];
+
+        // Initialize
+        async function init() {
+            showLoading();
+            
+            try {
+                await loadDrinksData();
+                setupEventListeners();
+                enableInputs();
+                hideLoading();
+                updateDropdown();
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                showError();
+            }
+        }
+
+        async function loadDrinksData() {
+            try {
+                const response = await fetch('./drinks.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Validate data structure
+                if (!data.Drinks || !Array.isArray(data.Drinks)) {
+                    throw new Error('Invalid data format: Expected "Drinks" array');
+                }
+                
+                // Validate each drink has required properties
+                for (const drink of data.Drinks) {
+                    if (!drink.name || !drink["ABV(%)"]) {
+                        throw new Error('Invalid drink data: Missing name or ABV(%)');
+                    }
+                }
+                
+                drinksData = data;
+                filteredDrinks = data.Drinks;
+                
+            } catch (error) {
+                console.error('Error loading drinks data:', error);
+                throw error;
+            }
+        }
+
+        function showLoading() {
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            appContent.style.display = 'none';
+            calculatorCard.classList.add('loading-state');
+        }
+
+        function hideLoading() {
+            loadingMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            appContent.style.display = 'block';
+            calculatorCard.classList.remove('loading-state');
+        }
+
+        function showError() {
+            loadingMessage.style.display = 'none';
+            errorMessage.style.display = 'block';
+            appContent.style.display = 'none';
+            calculatorCard.classList.remove('loading-state');
+        }
+
+        function enableInputs() {
+            searchInput.disabled = false;
+            volumeSelect.disabled = false;
+            priceInput.disabled = false;
+            searchInput.placeholder = 'Search for a drink...';
+        }
+
+        function setupEventListeners() {
+            searchInput.addEventListener('input', handleSearch);
+            searchInput.addEventListener('focus', showDropdown);
+            searchInput.addEventListener('blur', hideDropdownDelayed);
+            
+            volumeSelect.addEventListener('change', calculateValue);
+            priceInput.addEventListener('input', calculateValue);
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    hideDropdown();
+                }
+            });
+        }
+
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (query === '') {
+                filteredDrinks = drinksData.Drinks;
+                selectedDrink = null;
+            } else {
+                filteredDrinks = drinksData.Drinks.filter(drink =>
+                    drink.name.toLowerCase().includes(query)
+                );
+                
+                // Check if current input exactly matches a drink
+                const exactMatch = drinksData.Drinks.find(drink =>
+                    drink.name.toLowerCase() === query
+                );
+                
+                if (exactMatch) {
+                    selectedDrink = exactMatch;
+                } else {
+                    selectedDrink = null;
+                }
+            }
+            
+            updateDropdown();
+            showDropdown();
+            calculateValue();
+        }
+
+        function updateDropdown() {
+            dropdown.innerHTML = '';
+            
+            if (filteredDrinks.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'dropdown-item';
+                noResults.innerHTML = '<span>No drinks found</span>';
+                dropdown.appendChild(noResults);
+                return;
+            }
+
+            filteredDrinks.forEach(drink => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.innerHTML = `
+                    <span>${drink.name}</span>
+                    <span class="drink-abv">${drink["ABV(%)"]}</span>
+                `;
+                
+                item.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Prevent blur from firing first
+                    selectDrink(drink);
+                });
+                
+                dropdown.appendChild(item);
+            });
+        }
+
+        function selectDrink(drink) {
+            selectedDrink = drink;
+            searchInput.value = drink.name;
+            hideDropdown();
+            clearError(drinkError);
+            calculateValue();
+        }
+
+        function showDropdown() {
+            if (filteredDrinks.length > 0 && drinksData) {
+                dropdown.classList.add('show');
+            }
+        }
+
+        function hideDropdown() {
+            dropdown.classList.remove('show');
+        }
+
+        function hideDropdownDelayed() {
+            setTimeout(hideDropdown, 150);
+        }
+
+        function calculateValue() {
+    if (!drinksData) return;
+    
+    clearErrors();
+    
+    const volume = parseFloat(volumeSelect.value);
+    const price = parseFloat(priceInput.value);
+    
+    let isValid = true;
+
+    // Validate drink selection
+    if (!selectedDrink) {
+        if (searchInput.value.trim()) {
+            showError(drinkError, 'Please select a drink from the dropdown');
+        }
+        isValid = false;
+    }
+
+    // Validate volume
+    if (!volume) {
+        if (volumeSelect.value !== '') {
+            showError(volumeError, 'Please select a valid volume');
+        }
+        isValid = false;
+    }
+
+    // Validate price
+    if (!price || price <= 0) {
+        if (priceInput.value.trim()) {
+            showError(priceError, 'Please enter a valid price greater than 0');
+        }
+        isValid = false;
+    }
+
+    if (!isValid) {
+        hideResult();
+        return;
+    }
+
+    // Calculate drink value: ((Volume / Price) * ABV%) / 100
+    const abv = parseFloat(selectedDrink["ABV(%)"].replace('%', ''));
+    const drinkValue = ((volume / price) * abv) / 100;
+    
+    // Display result
+    resultValue.textContent = drinkValue.toFixed(2);
+    showResult();
+}
+
+        function showError(errorElement, message) {
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+
+        function clearError(errorElement) {
+            errorElement.classList.remove('show');
+        }
+
+        function clearErrors() {
+            clearError(drinkError);
+            clearError(volumeError);
+            clearError(priceError);
+        }
+
+        function showResult() {
+            resultSection.classList.add('show');
+        }
+
+        function hideResult() {
+            resultSection.classList.remove('show');
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
