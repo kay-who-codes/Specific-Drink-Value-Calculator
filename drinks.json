@@ -2,71 +2,78 @@
   "Drinks": [
     {
       "name": "Stella Artois",
-      "ABV(%)": "4.6%"
+      "ABV(%)": "4.6%",
+      "Price(£)": "6.00"
     },
 	{
       "name": "Stella Artois Unfiltered",
-      "ABV(%)": "5%"
+      "ABV(%)": "5%",
+      "Price(£)": "7.00"
     },
     {
       "name": "Guinness",
-      "ABV(%)": "4.2%"
+      "ABV(%)": "4.2%",
+      "Price(£)": "5.50"
     },
     {
       "name": "Heineken",
-      "ABV(%)": "5%"
+      "ABV(%)": "5%",
+      "Price(£)": "6.00"
     },
     {
       "name": "Corona Extra",
-      "ABV(%)": "4.5%"
+      "ABV(%)": "4.5%",
+      "Price(£)": "4.50"
     },
     {
       "name": "Budweiser",
-      "ABV(%)": "5%"
+      "ABV(%)": "5%",
+      "Price(£)": "4.00"
     },
     {
       "name": "Carlsberg",
-      "ABV(%)": "3.8%"
+      "ABV(%)": "3.8%",
+      "Price(£)": "1.50"
     },
     {
       "name": "Foster's",
-      "ABV(%)": "4%"
+      "ABV(%)": "4%",
+      "Price(£)": "1.70"
     },
     {
       "name": "Peroni Nastro Azzurro",
-      "ABV(%)": "5.1%"
+      "ABV(%)": "5.1%",
+      "Price(£)": "6.80"
     },
     {
       "name": "San Miguel",
-      "ABV(%)": "5%"
-    },
-    {
-      "name": "Strongbow",
-      "ABV(%)": "5%"
+      "ABV(%)": "5%",
+      "Price(£)": "6.10"
     },
     {
       "name": "Magners",
-      "ABV(%)": "4.5%"
+      "ABV(%)": "4.5%",
+      "Price(£)": "2.40"
     },
     {
       "name": "Kopparberg",
-      "ABV(%)": "4%"
-    },
-    {
-      "name": "Smirnoff Ice",
-      "ABV(%)": "4%"
-    },
-    {
-      "name": "Desperados",
-      "ABV(%)": "5.9%"
+      "ABV(%)": "4%",
+      "Price(£)": "2.40"
     },
     {
       "name": "Blue Moon",
-      "ABV(%)": "5.4%"
+      "ABV(%)": "5.4%",
+      "Price(£)": "6.90"
     },
 	{
       "name": "Wine",
-      "ABV(%)": "12%"
+      "ABV(%)": "12%",
+      "Price(£)": "6.50"
+    },
+	{
+      "name": "Lambrini",
+      "ABV(%)": "6%",
+      "Price(£)": "4.00"
     }
   ]
 }
