@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍾 Specific Drink Value Calculator</title>
+    <title>🍾 Drink Value Comparison Calculator</title>
     <style>
         :root {
             --bg-dark: #131313;
@@ -16,6 +16,8 @@
             --border-color: #333;
             --hover-bg: #333;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --success-color: #4ade80;
+            --warning-color: #fbbf24;
         }
 
         * {
@@ -34,7 +36,7 @@
         }
 
         main {
-            max-width: 600px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 2rem 0;
         }
@@ -62,19 +64,361 @@
             font-weight: 300;
         }
 
-        .calculator-card {
+        .controls-section {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .add-group-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+            color: var(--text-white);
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(255, 64, 21, 0.3);
+        }
+
+        .add-group-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 64, 21, 0.4);
+        }
+
+        .add-group-btn:active {
+            transform: translateY(0);
+        }
+
+        .groups-container {
+            display: grid;
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .group-card {
             background: var(--card-bg);
             border-radius: 16px;
             padding: 2rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border-color);
-            animation: fadeInUp 0.8s ease-out 0.2s both;
+            transition: var(--transition);
+            animation: fadeInUp 0.5s ease-out both;
+        }
+
+        .group-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .group-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-accent);
+        }
+
+        .group-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            padding: 0.5rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.2rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+        }
+
+        .icon-btn.delete-btn:hover {
+            background: rgba(255, 64, 21, 0.1);
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+        }
+
+        .drinks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .drink-item {
+            background: var(--input-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            animation: fadeInUp 0.3s ease-out both;
+        }
+
+        .drink-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .drink-number {
+            font-weight: 600;
+            color: var(--primary-accent);
+        }
+
+        .remove-drink-btn {
+            padding: 0.25rem 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .remove-drink-btn:hover {
+            background: rgba(255, 64, 21, 0.1);
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-white);
+            font-size: 0.9rem;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-white);
+            font-size: 0.95rem;
             transition: var(--transition);
         }
 
-        .calculator-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(255, 64, 21, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary-accent);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-10px);
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .dropdown.show {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .dropdown-item {
+            padding: 0.875rem 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background: var(--hover-bg);
+            color: var(--primary-accent);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .drink-abv {
+            font-size: 0.85rem;
+            color: var(--primary-accent);
+            font-weight: 600;
+        }
+
+        select, .price-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-white);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E0E0E0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+            padding-right: 3rem;
+        }
+
+        select:focus, .price-input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(255, 64, 21, 0.1);
+        }
+
+        select option {
+            background: var(--bg-dark);
+            color: var(--text-white);
+            padding: 0.5rem;
+        }
+
+        .add-drink-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--input-bg);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .add-drink-btn:hover {
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+            background: rgba(255, 64, 21, 0.05);
+        }
+
+        .group-result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 64, 21, 0.1), rgba(181, 26, 0, 0.1));
+            border-radius: 12px;
+            border: 1px solid rgba(255, 64, 21, 0.2);
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-accent);
+            margin-bottom: 0.25rem;
+        }
+
+        .result-details {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+
+        .best-value-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--success-color);
+            color: var(--bg-dark);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+
+        .comparison-summary {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--primary-accent);
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-white);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .summary-content {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .summary-item {
+            padding: 1rem;
+            background: var(--input-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-item.winner {
+            border-color: var(--success-color);
+            background: rgba(74, 222, 128, 0.1);
         }
 
         .loading-state {
@@ -99,209 +443,16 @@
             border: 1px solid rgba(255, 64, 21, 0.2);
         }
 
-        .input-group {
-            margin-bottom: 2rem;
-        }
-
-        .input-label {
-            display: block;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            color: var(--text-white);
-            font-size: 1rem;
-        }
-
-        .search-container {
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            background: var(--input-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-white);
-            font-size: 1rem;
-            transition: var(--transition);
-            min-height: 48px;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 3px rgba(255, 64, 21, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .search-input::placeholder {
-            color: #888;
-        }
-
-        .search-input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--input-bg);
-            border: 2px solid var(--primary-accent);
-            border-top: none;
-            border-radius: 0 0 12px 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 100;
-            opacity: 0;
-            transform: translateY(-10px);
-            visibility: hidden;
-            transition: var(--transition);
-        }
-
-        .dropdown.show {
-            opacity: 1;
-            transform: translateY(0);
-            visibility: visible;
-        }
-
-        .dropdown-item {
-            padding: 1rem 1.25rem;
-            cursor: pointer;
-            transition: var(--transition);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            min-height: 48px;
-        }
-
-        .dropdown-item:hover {
-            background: var(--hover-bg);
-            color: var(--primary-accent);
-        }
-
-        .dropdown-item:last-child {
-            border-bottom: none;
-        }
-
-        .drink-abv {
-            font-size: 0.9rem;
-            color: var(--primary-accent);
-            font-weight: 600;
-        }
-
-        select {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            background: var(--input-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-white);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            min-height: 48px;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E0E0E0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1rem;
-            padding-right: 3rem;
-        }
-
-        select:focus {
-            outline: none;
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 3px rgba(255, 64, 21, 0.1);
-            transform: translateY(-1px);
-        }
-
-        select:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        select option {
-            background: var(--input-bg);
-            color: var(--text-white);
-            padding: 0.5rem;
-        }
-
-        .price-input {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            background: var(--input-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-white);
-            font-size: 1rem;
-            transition: var(--transition);
-            min-height: 48px;
-        }
-
-        .price-input:focus {
-            outline: none;
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 3px rgba(255, 64, 21, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .price-input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .result-section {
-            margin-top: 2rem;
-            padding: 2rem;
-            background: linear-gradient(135deg, rgba(255, 64, 21, 0.1), rgba(181, 26, 0, 0.1));
-            border-radius: 12px;
-            border: 1px solid rgba(255, 64, 21, 0.2);
+        .empty-state {
             text-align: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: var(--transition);
-        }
-
-        .result-section.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .result-label {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            padding: 3rem 2rem;
             color: var(--text-light);
+            opacity: 0.6;
         }
 
-        .result-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary-accent);
-            margin-bottom: 0.5rem;
-        }
-
-        .result-unit {
-            font-size: 1rem;
-            color: var(--text-light);
-            opacity: 0.8;
-        }
-
-        .error-message {
-            color: var(--primary-accent);
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: var(--transition);
-        }
-
-        .error-message.show {
-            opacity: 1;
-            transform: translateY(0);
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
 
         @keyframes fadeInUp {
@@ -324,11 +475,19 @@
             }
         }
 
-        .loading {
-            animation: pulse 1.5s infinite;
+        .dropdown::-webkit-scrollbar {
+            width: 6px;
         }
 
-        /* Responsive Design */
+        .dropdown::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        .dropdown::-webkit-scrollbar-thumb {
+            background: var(--primary-accent);
+            border-radius: 3px;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 0.5rem;
@@ -338,167 +497,110 @@
                 padding: 1rem 0;
             }
 
-            .calculator-card {
+            .group-card {
                 padding: 1.5rem;
-                margin: 0.5rem 0;
             }
 
             .app-header {
                 margin-bottom: 2rem;
             }
 
-            .input-group {
-                margin-bottom: 1.5rem;
-            }
-
-            .result-section {
-                padding: 1.5rem;
+            .group-title {
+                font-size: 1.25rem;
             }
 
             .result-value {
-                font-size: 2rem;
+                font-size: 1.5rem;
             }
         }
 
         @media (max-width: 480px) {
-            .calculator-card {
+            .group-card {
                 padding: 1rem;
                 border-radius: 12px;
+            }
+
+            .drink-item {
+                padding: 1rem;
             }
 
             .search-input,
             select,
             .price-input {
-                padding: 0.875rem 1rem;
-                font-size: 16px; /* Prevents zoom on iOS */
+                font-size: 16px;
             }
-
-            .dropdown-item {
-                padding: 0.875rem 1rem;
-            }
-        }
-
-        /* Custom scrollbar for dropdown */
-        .dropdown::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .dropdown::-webkit-scrollbar-track {
-            background: var(--input-bg);
-        }
-
-        .dropdown::-webkit-scrollbar-thumb {
-            background: var(--primary-accent);
-            border-radius: 3px;
-        }
-
-        .dropdown::-webkit-scrollbar-thumb:hover {
-            background: var(--secondary-accent);
         }
     </style>
 </head>
 <body>
     <main>
         <header class="app-header">
-            <h1 class="app-title">Specific Drink Value Calculator</h1>
-            <p class="app-subtitle">Find the best value drinks based on volume, price, and ABV</p>
+            <h1 class="app-title">Drink Value Comparison Calculator</h1>
+            <p class="app-subtitle">Compare multiple drinks across groups to find the best value</p>
         </header>
 
-        <section class="calculator-card" id="calculator-card">
-            <div id="loading-message" class="loading-message" style="display: none;">
-                Loading drinks data...
-            </div>
+        <div id="loading-message" class="loading-message" style="display: none;">
+            Loading drinks data...
+        </div>
 
-            <div id="error-message" class="error-state" style="display: none;">
-                <h3>Unable to Load Drinks Data</h3>
-                <p>Please make sure the drinks.json file is in the same folder as this HTML file.</p>
-                <p>Expected format:</p>
-                <pre style="text-align: left; margin-top: 1rem; font-size: 0.9rem;">
-{
-  "Drinks": [
-    {
-      "name": "Drink Name",
-      "ABV(%)": "5%"
-    }
-  ]
-}
-                </pre>
-            </div>
+        <div id="error-message" class="error-state" style="display: none;">
+            <h3>Unable to Load Drinks Data</h3>
+            <p>Please make sure the drinks.json file is in the same folder as this HTML file.</p>
+        </div>
 
-            <div id="app-content">
-                <div class="input-group">
-                    <label for="drink-search" class="input-label">Select Drink</label>
-                    <div class="search-container">
-                        <input 
-                            type="text" 
-                            id="drink-search" 
-                            class="search-input" 
-                            placeholder="Search for a drink..."
-                            autocomplete="off"
-                            disabled
-                        >
-                        <div id="dropdown" class="dropdown"></div>
-                    </div>
-                    <div id="drink-error" class="error-message">Please select a drink</div>
-                </div>
+        <div id="app-content" style="display: none;">
+            <section class="controls-section">
+                <button class="add-group-btn" onclick="addGroup()">
+                    ➕ Add Comparison Group
+                </button>
+            </section>
 
-                <div class="input-group">
-                    <label for="volume-select" class="input-label">Volume</label>
-                    <select id="volume-select" disabled>
-                        <option value="">Select volume...</option>
-                        <option value="440">440ml</option>
-                        <option value="500">500ml</option>
-                        <option value="568">568ml</option>
-                        <option value="620">620ml</option>
-                        <option value="660">660ml</option>
-                        <option value="700">700ml</option>
-                    </select>
-                    <div id="volume-error" class="error-message">Please select a volume</div>
-                </div>
-
-                <div class="input-group">
-                    <label for="price-input" class="input-label">Price (£)</label>
-                    <input 
-                        type="number" 
-                        id="price-input" 
-                        class="price-input" 
-                        placeholder="Enter price..."
-                        step="0.01"
-                        min="0"
-                        disabled
-                    >
-                    <div id="price-error" class="error-message">Please enter a valid price</div>
-                </div>
-
-                <div id="result-section" class="result-section">
-                    <div class="result-label">Drink Value</div>
-                    <div id="result-value" class="result-value">0.00</div>
-                    <div class="result-unit">Value Score</div>
+            <div id="groups-container" class="groups-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🍺</div>
+                    <h3>No comparison groups yet</h3>
+                    <p>Click "Add Comparison Group" to start comparing drinks</p>
                 </div>
             </div>
-        </section>
+
+            <div id="comparison-summary" class="comparison-summary" style="display: none;">
+                <h2 class="summary-title">📊 Overall Comparison</h2>
+                <div id="summary-content" class="summary-content"></div>
+            </div>
+        </div>
     </main>
 
     <script>
-        // DOM elements
-        const searchInput = document.getElementById('drink-search');
-        const dropdown = document.getElementById('dropdown');
-        const volumeSelect = document.getElementById('volume-select');
-        const priceInput = document.getElementById('price-input');
-        const resultSection = document.getElementById('result-section');
-        const resultValue = document.getElementById('result-value');
-        const drinkError = document.getElementById('drink-error');
-        const volumeError = document.getElementById('volume-error');
-        const priceError = document.getElementById('price-error');
-        const loadingMessage = document.getElementById('loading-message');
-        const errorMessage = document.getElementById('error-message');
-        const appContent = document.getElementById('app-content');
-        const calculatorCard = document.getElementById('calculator-card');
+        // Volume options with natural language descriptions
+        const VOLUME_OPTIONS = [
+            { value: 330, label: '330ml (Single)' },
+            { value: 440, label: '440ml (Single)' },
+            { value: 500, label: '500ml (Single)' },
+            { value: 568, label: '568ml (Pint)' },
+            { value: 620, label: '620ml (Single)' },
+            { value: 660, label: '660ml (Single)' },
+            { value: 700, label: '700ml (Single)' },
+            { value: 1320, label: '330ml 4-pack' },
+            { value: 1760, label: '440ml 4-pack' },
+            { value: 2000, label: '500ml 4-pack' },
+            { value: 2272, label: '568ml 4-pack' },
+            { value: 1980, label: '330ml 6-pack' },
+            { value: 5280, label: '440ml 12-pack' }
+        ];
 
         // State
         let drinksData = null;
-        let selectedDrink = null;
-        let filteredDrinks = [];
+        let groups = [];
+        let groupIdCounter = 0;
+        let drinkIdCounter = 0;
+
+        // DOM elements
+        const loadingMessage = document.getElementById('loading-message');
+        const errorMessage = document.getElementById('error-message');
+        const appContent = document.getElementById('app-content');
+        const groupsContainer = document.getElementById('groups-container');
+        const comparisonSummary = document.getElementById('comparison-summary');
+        const summaryContent = document.getElementById('summary-content');
 
         // Initialize
         async function init() {
@@ -506,10 +608,8 @@
             
             try {
                 await loadDrinksData();
-                setupEventListeners();
-                enableInputs();
                 hideLoading();
-                updateDropdown();
+                addGroup(); // Add first group automatically
             } catch (error) {
                 console.error('Failed to initialize app:', error);
                 showError();
@@ -526,12 +626,10 @@
                 
                 const data = await response.json();
                 
-                // Validate data structure
                 if (!data.Drinks || !Array.isArray(data.Drinks)) {
                     throw new Error('Invalid data format: Expected "Drinks" array');
                 }
                 
-                // Validate each drink has required properties
                 for (const drink of data.Drinks) {
                     if (!drink.name || !drink["ABV(%)"]) {
                         throw new Error('Invalid drink data: Missing name or ABV(%)');
@@ -539,7 +637,6 @@
                 }
                 
                 drinksData = data;
-                filteredDrinks = data.Drinks;
                 
             } catch (error) {
                 console.error('Error loading drinks data:', error);
@@ -551,78 +648,211 @@
             loadingMessage.style.display = 'block';
             errorMessage.style.display = 'none';
             appContent.style.display = 'none';
-            calculatorCard.classList.add('loading-state');
         }
 
         function hideLoading() {
             loadingMessage.style.display = 'none';
             errorMessage.style.display = 'none';
             appContent.style.display = 'block';
-            calculatorCard.classList.remove('loading-state');
         }
 
         function showError() {
             loadingMessage.style.display = 'none';
             errorMessage.style.display = 'block';
             appContent.style.display = 'none';
-            calculatorCard.classList.remove('loading-state');
         }
 
-        function enableInputs() {
-            searchInput.disabled = false;
-            volumeSelect.disabled = false;
-            priceInput.disabled = false;
-            searchInput.placeholder = 'Search for a drink...';
-        }
-
-        function setupEventListeners() {
-            searchInput.addEventListener('input', handleSearch);
-            searchInput.addEventListener('focus', showDropdown);
-            searchInput.addEventListener('blur', hideDropdownDelayed);
+        function addGroup() {
+            const groupId = groupIdCounter++;
+            const group = {
+                id: groupId,
+                drinks: []
+            };
             
-            volumeSelect.addEventListener('change', calculateValue);
-            priceInput.addEventListener('input', calculateValue);
+            groups.push(group);
+            renderGroups();
+            addDrinkToGroup(groupId);
+        }
+
+        function deleteGroup(groupId) {
+            groups = groups.filter(g => g.id !== groupId);
+            renderGroups();
+            updateComparison();
+        }
+
+        function addDrinkToGroup(groupId) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+            
+            const drinkId = drinkIdCounter++;
+            group.drinks.push({
+                id: drinkId,
+                selectedDrink: null,
+                volume: '',
+                price: ''
+            });
+            
+            renderGroups();
+        }
+
+        function removeDrinkFromGroup(groupId, drinkId) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+            
+            group.drinks = group.drinks.filter(d => d.id !== drinkId);
+            renderGroups();
+            updateComparison();
+        }
+
+        function renderGroups() {
+            if (groups.length === 0) {
+                groupsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🍺</div>
+                        <h3>No comparison groups yet</h3>
+                        <p>Click "Add Comparison Group" to start comparing drinks</p>
+                    </div>
+                `;
+                return;
+            }
+
+            groupsContainer.innerHTML = groups.map(group => `
+                <div class="group-card" data-group-id="${group.id}">
+                    <div class="group-header">
+                        <h2 class="group-title">Group ${group.id + 1}</h2>
+                        <div class="group-controls">
+                            <button class="icon-btn delete-btn" onclick="deleteGroup(${group.id})" title="Delete group">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="drinks-list">
+                        ${group.drinks.map(drink => renderDrinkItem(group.id, drink)).join('')}
+                    </div>
+                    
+                    <button class="add-drink-btn" onclick="addDrinkToGroup(${group.id})">
+                        ➕ Add Another Drink to Compare
+                    </button>
+                    
+                    <div class="group-result" id="result-${group.id}">
+                        <div class="result-label">Average Value Score</div>
+                        <div class="result-value">—</div>
+                        <div class="result-details">Add drinks to calculate</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Reinitialize event listeners for all search inputs
+            groups.forEach(group => {
+                group.drinks.forEach(drink => {
+                    initializeDrinkSearch(group.id, drink.id);
+                });
+            });
+        }
+
+        function renderDrinkItem(groupId, drink) {
+            return `
+                <div class="drink-item">
+                    <div class="drink-item-header">
+                        <span class="drink-number">Drink ${drink.id + 1}</span>
+                        <button class="remove-drink-btn" onclick="removeDrinkFromGroup(${groupId}, ${drink.id})">
+                            Remove
+                        </button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Select Drink</label>
+                        <div class="search-container">
+                            <input 
+                                type="text" 
+                                id="search-${groupId}-${drink.id}" 
+                                class="search-input" 
+                                placeholder="Search for a drink..."
+                                autocomplete="off"
+                                value="${drink.selectedDrink ? drink.selectedDrink.name : ''}"
+                            >
+                            <div id="dropdown-${groupId}-${drink.id}" class="dropdown"></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Volume</label>
+                        <select id="volume-${groupId}-${drink.id}" onchange="updateDrinkData(${groupId}, ${drink.id})">
+                            <option value="">Select volume...</option>
+                            ${VOLUME_OPTIONS.map(opt => `
+                                <option value="${opt.value}" ${drink.volume == opt.value ? 'selected' : ''}>
+                                    ${opt.label}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Price (£)</label>
+                        <input 
+                            type="number" 
+                            id="price-${groupId}-${drink.id}" 
+                            class="price-input" 
+                            placeholder="Enter price..."
+                            step="0.01"
+                            min="0"
+                            value="${drink.price}"
+                            oninput="updateDrinkData(${groupId}, ${drink.id})"
+                        >
+                    </div>
+                </div>
+            `;
+        }
+
+        function initializeDrinkSearch(groupId, drinkId) {
+            const searchInput = document.getElementById(`search-${groupId}-${drinkId}`);
+            const dropdown = document.getElementById(`dropdown-${groupId}-${drinkId}`);
+            
+            if (!searchInput || !dropdown) return;
+
+            let filteredDrinks = drinksData.Drinks;
+
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                
+                if (query === '') {
+                    filteredDrinks = drinksData.Drinks;
+                } else {
+                    filteredDrinks = drinksData.Drinks.filter(drink =>
+                        drink.name.toLowerCase().includes(query)
+                    );
+                }
+                
+                updateDropdown(groupId, drinkId, filteredDrinks);
+                showDropdown(dropdown);
+            });
+
+            searchInput.addEventListener('focus', () => {
+                updateDropdown(groupId, drinkId, filteredDrinks);
+                showDropdown(dropdown);
+            });
+
+            searchInput.addEventListener('blur', () => {
+                setTimeout(() => hideDropdown(dropdown), 150);
+            });
 
             // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.search-container')) {
-                    hideDropdown();
+                if (!e.target.closest(`#search-${groupId}-${drinkId}`) && 
+                    !e.target.closest(`#dropdown-${groupId}-${drinkId}`)) {
+                    hideDropdown(dropdown);
                 }
             });
         }
 
-        function handleSearch(e) {
-            const query = e.target.value.toLowerCase().trim();
-            
-            if (query === '') {
-                filteredDrinks = drinksData.Drinks;
-                selectedDrink = null;
-            } else {
-                filteredDrinks = drinksData.Drinks.filter(drink =>
-                    drink.name.toLowerCase().includes(query)
-                );
-                
-                // Check if current input exactly matches a drink
-                const exactMatch = drinksData.Drinks.find(drink =>
-                    drink.name.toLowerCase() === query
-                );
-                
-                if (exactMatch) {
-                    selectedDrink = exactMatch;
-                } else {
-                    selectedDrink = null;
-                }
-            }
-            
-            updateDropdown();
-            showDropdown();
-            calculateValue();
-        }
+        function updateDropdown(groupId, drinkId, drinks) {
+            const dropdown = document.getElementById(`dropdown-${groupId}-${drinkId}`);
+            if (!dropdown) return;
 
-        function updateDropdown() {
             dropdown.innerHTML = '';
             
-            if (filteredDrinks.length === 0) {
+            if (drinks.length === 0) {
                 const noResults = document.createElement('div');
                 noResults.className = 'dropdown-item';
                 noResults.innerHTML = '<span>No drinks found</span>';
@@ -630,7 +860,7 @@
                 return;
             }
 
-            filteredDrinks.forEach(drink => {
+            drinks.forEach(drink => {
                 const item = document.createElement('div');
                 item.className = 'dropdown-item';
                 item.innerHTML = `
@@ -639,105 +869,154 @@
                 `;
                 
                 item.addEventListener('mousedown', (e) => {
-                    e.preventDefault(); // Prevent blur from firing first
-                    selectDrink(drink);
+                    e.preventDefault();
+                    selectDrink(groupId, drinkId, drink);
                 });
                 
                 dropdown.appendChild(item);
             });
         }
 
-        function selectDrink(drink) {
-            selectedDrink = drink;
-            searchInput.value = drink.name;
-            hideDropdown();
-            clearError(drinkError);
-            calculateValue();
-        }
-
-        function showDropdown() {
-            if (filteredDrinks.length > 0 && drinksData) {
-                dropdown.classList.add('show');
+        function selectDrink(groupId, drinkId, drink) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+            
+            const drinkItem = group.drinks.find(d => d.id === drinkId);
+            if (!drinkItem) return;
+            
+            drinkItem.selectedDrink = drink;
+            
+            const searchInput = document.getElementById(`search-${groupId}-${drinkId}`);
+            if (searchInput) {
+                searchInput.value = drink.name;
             }
+            
+            const dropdown = document.getElementById(`dropdown-${groupId}-${drinkId}`);
+            hideDropdown(dropdown);
+            
+            updateComparison();
         }
 
-        function hideDropdown() {
-            dropdown.classList.remove('show');
+        function updateDrinkData(groupId, drinkId) {
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+            
+            const drinkItem = group.drinks.find(d => d.id === drinkId);
+            if (!drinkItem) return;
+            
+            const volumeSelect = document.getElementById(`volume-${groupId}-${drinkId}`);
+            const priceInput = document.getElementById(`price-${groupId}-${drinkId}`);
+            
+            if (volumeSelect) drinkItem.volume = volumeSelect.value;
+            if (priceInput) drinkItem.price = priceInput.value;
+            
+            updateComparison();
         }
 
-        function hideDropdownDelayed() {
-            setTimeout(hideDropdown, 150);
+        function showDropdown(dropdown) {
+            if (dropdown) dropdown.classList.add('show');
         }
 
-        function calculateValue() {
-    if (!drinksData) return;
-    
-    clearErrors();
-    
-    const volume = parseFloat(volumeSelect.value);
-    const price = parseFloat(priceInput.value);
-    
-    let isValid = true;
-
-    // Validate drink selection
-    if (!selectedDrink) {
-        if (searchInput.value.trim()) {
-            showError(drinkError, 'Please select a drink from the dropdown');
-        }
-        isValid = false;
-    }
-
-    // Validate volume
-    if (!volume) {
-        if (volumeSelect.value !== '') {
-            showError(volumeError, 'Please select a valid volume');
-        }
-        isValid = false;
-    }
-
-    // Validate price
-    if (!price || price <= 0) {
-        if (priceInput.value.trim()) {
-            showError(priceError, 'Please enter a valid price greater than 0');
-        }
-        isValid = false;
-    }
-
-    if (!isValid) {
-        hideResult();
-        return;
-    }
-
-    // Calculate drink value: ((Volume / Price) * ABV%) / 100
-    const abv = parseFloat(selectedDrink["ABV(%)"].replace('%', ''));
-    const drinkValue = ((volume / price) * abv) / 100;
-    
-    // Display result
-    resultValue.textContent = drinkValue.toFixed(2);
-    showResult();
-}
-
-        function showError(errorElement, message) {
-            errorElement.textContent = message;
-            errorElement.classList.add('show');
+        function hideDropdown(dropdown) {
+            if (dropdown) dropdown.classList.remove('show');
         }
 
-        function clearError(errorElement) {
-            errorElement.classList.remove('show');
+        function calculateDrinkValue(drink) {
+            if (!drink.selectedDrink || !drink.volume || !drink.price || drink.price <= 0) {
+                return null;
+            }
+            
+            const volume = parseFloat(drink.volume);
+            const price = parseFloat(drink.price);
+            const abv = parseFloat(drink.selectedDrink["ABV(%)"].replace('%', ''));
+            
+            return ((volume / price) * abv) / 100;
         }
 
-        function clearErrors() {
-            clearError(drinkError);
-            clearError(volumeError);
-            clearError(priceError);
-        }
+        function updateComparison() {
+            // Calculate values for each group
+            const groupResults = groups.map(group => {
+                const validDrinks = group.drinks
+                    .map(drink => ({
+                        ...drink,
+                        value: calculateDrinkValue(drink)
+                    }))
+                    .filter(drink => drink.value !== null);
 
-        function showResult() {
-            resultSection.classList.add('show');
-        }
+                if (validDrinks.length === 0) {
+                    return {
+                        groupId: group.id,
+                        averageValue: null,
+                        drinkCount: 0,
+                        validDrinks: []
+                    };
+                }
 
-        function hideResult() {
-            resultSection.classList.remove('show');
+                const totalValue = validDrinks.reduce((sum, drink) => sum + drink.value, 0);
+                const averageValue = totalValue / validDrinks.length;
+
+                return {
+                    groupId: group.id,
+                    averageValue: averageValue,
+                    drinkCount: validDrinks.length,
+                    validDrinks: validDrinks
+                };
+            });
+
+            // Update individual group results
+            groupResults.forEach(result => {
+                const resultElement = document.getElementById(`result-${result.groupId}`);
+                if (!resultElement) return;
+
+                if (result.averageValue === null) {
+                    resultElement.innerHTML = `
+                        <div class="result-label">Average Value Score</div>
+                        <div class="result-value">—</div>
+                        <div class="result-details">Add drinks to calculate</div>
+                    `;
+                } else {
+                    resultElement.innerHTML = `
+                        <div class="result-label">Average Value Score</div>
+                        <div class="result-value">${result.averageValue.toFixed(2)}</div>
+                        <div class="result-details">${result.drinkCount} drink${result.drinkCount !== 1 ? 's' : ''} compared</div>
+                    `;
+                }
+            });
+
+            // Update comparison summary
+            const validGroups = groupResults.filter(r => r.averageValue !== null);
+            
+            if (validGroups.length < 2) {
+                comparisonSummary.style.display = 'none';
+                return;
+            }
+
+            // Find best value group
+            const bestGroup = validGroups.reduce((best, current) => 
+                current.averageValue > best.averageValue ? current : best
+            );
+
+            comparisonSummary.style.display = 'block';
+            summaryContent.innerHTML = validGroups
+                .sort((a, b) => b.averageValue - a.averageValue)
+                .map(result => {
+                    const isBest = result.groupId === bestGroup.groupId;
+                    return `
+                        <div class="summary-item ${isBest ? 'winner' : ''}">
+                            <strong>Group ${result.groupId + 1}</strong>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                <span style="font-size: 1.5rem; font-weight: 700; color: var(--primary-accent);">
+                                    ${result.averageValue.toFixed(2)}
+                                </span>
+                                <span style="opacity: 0.8;">
+                                    ${result.drinkCount} drink${result.drinkCount !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                            ${isBest ? '<span class="best-value-indicator">🏆 BEST VALUE</span>' : ''}
+                        </div>
+                    `;
+                })
+                .join('');
         }
 
         // Initialize the app
