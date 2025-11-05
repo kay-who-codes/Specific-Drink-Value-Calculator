@@ -1,0 +1,72 @@
+{
+  "Drinks": [
+    {
+      "name": "Stella Artois",
+      "ABV(%)": "4.6%"
+    },
+	{
+      "name": "Stella Artois Unfiltered",
+      "ABV(%)": "5%"
+    },
+    {
+      "name": "Guinness",
+      "ABV(%)": "4.2%"
+    },
+    {
+      "name": "Heineken",
+      "ABV(%)": "5%"
+    },
+    {
+      "name": "Corona Extra",
+      "ABV(%)": "4.5%"
+    },
+    {
+      "name": "Budweiser",
+      "ABV(%)": "5%"
+    },
+    {
+      "name": "Carlsberg",
+      "ABV(%)": "3.8%"
+    },
+    {
+      "name": "Foster's",
+      "ABV(%)": "4%"
+    },
+    {
+      "name": "Peroni Nastro Azzurro",
+      "ABV(%)": "5.1%"
+    },
+    {
+      "name": "San Miguel",
+      "ABV(%)": "5%"
+    },
+    {
+      "name": "Strongbow",
+      "ABV(%)": "5%"
+    },
+    {
+      "name": "Magners",
+      "ABV(%)": "4.5%"
+    },
+    {
+      "name": "Kopparberg",
+      "ABV(%)": "4%"
+    },
+    {
+      "name": "Smirnoff Ice",
+      "ABV(%)": "4%"
+    },
+    {
+      "name": "Desperados",
+      "ABV(%)": "5.9%"
+    },
+    {
+      "name": "Blue Moon",
+      "ABV(%)": "5.4%"
+    },
+	{
+      "name": "Wine",
+      "ABV(%)": "12%"
+    }
+  ]
+}
